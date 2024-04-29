@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>core &#8212; mypackage  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=039e1c02" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=b3ba4146"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for core</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<div class="viewcode-block" id="euler_bernoulli_beam"><a class="viewcode-back" href="../mypackage.html#core.euler_bernoulli_beam">[docs]</a><span class="k">def</span> <span class="nf">euler_bernoulli_beam</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">num_elements</span><span class="p">,</span> <span class="n">force</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the displacement of an Euler-Bernoulli beam.</span>
+
+<span class="sd">    :param length: The length of the rod (in meters).</span>
+<span class="sd">    :type length: float</span>
+<span class="sd">    :param num_elements: The number of elements in the beam.</span>
+<span class="sd">    :type num_elements: int</span>
+<span class="sd">    :param force: The applied force at the right tip (in kN).</span>
+<span class="sd">    :type force: float</span>
+
+<span class="sd">    :return: The displacement of the beam.</span>
+<span class="sd">    :rtype: numpy.ndarray</span>
+
+<span class="sd">    This function calculates the displacement of an Euler-Bernoulli beam given its length, the number of elements in the beam, and the applied force at the right tip. The beam is modeled as a series of massless, elastic rods connected by massless, rigid joints. The displacement is calculated using the Euler-Bernoulli beam equation, which takes into account the mass, stiffness, and boundary conditions of the beam.</span>
+
+<span class="sd">    The function first computes the density, Young&#39;s modulus, width, and thickness of the beam, as well as its moment of inertia and cross-sectional area. It then constructs the mass and stiffness matrices for the beam, taking into account the element length and the boundary conditions (fixing the left tip). Finally, the function solves for the displacement of the beam using the stiffness matrix and the applied force.</span>
+
+<span class="sd">    The function uses the NumPy library for numerical computations.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">rho</span> <span class="o">=</span> <span class="mi">2700</span>  <span class="c1"># Density</span>
+    <span class="n">E</span> <span class="o">=</span> <span class="mf">69e9</span>    <span class="c1"># Young Modulus</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="mf">0.02</span>    <span class="c1"># Width of the beam in meters</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="mf">0.006</span>   <span class="c1"># Thickness of the beam in meters</span>
+    <span class="n">I</span> <span class="o">=</span> <span class="p">(</span><span class="n">b</span> <span class="o">*</span> <span class="n">h</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span> <span class="o">/</span> <span class="mi">12</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">b</span> <span class="o">*</span> <span class="n">h</span>   <span class="c1"># Cross section area</span>
+    <span class="n">Le</span> <span class="o">=</span> <span class="n">length</span> <span class="o">/</span> <span class="n">num_elements</span>  <span class="c1"># Element length</span>
+    
+    <span class="c1"># Mass matrix</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="o">*</span><span class="n">num_elements</span><span class="o">+</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">num_elements</span><span class="o">+</span><span class="mi">2</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_elements</span><span class="p">):</span>
+        <span class="n">M</span><span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="n">i</span><span class="p">:</span><span class="mi">2</span><span class="o">*</span><span class="n">i</span><span class="o">+</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">i</span><span class="p">:</span><span class="mi">2</span><span class="o">*</span><span class="n">i</span><span class="o">+</span><span class="mi">4</span><span class="p">]</span> <span class="o">+=</span> <span class="n">rho</span><span class="o">*</span><span class="n">A</span><span class="o">*</span><span class="n">Le</span><span class="o">/</span><span class="mi">420</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">156</span><span class="p">,</span> <span class="mi">22</span><span class="o">*</span><span class="n">Le</span><span class="p">,</span> <span class="mi">54</span><span class="p">,</span> <span class="o">-</span><span class="mi">13</span><span class="o">*</span><span class="n">Le</span><span class="p">],</span> 
+                                                            <span class="p">[</span><span class="mi">22</span><span class="o">*</span><span class="n">Le</span><span class="p">,</span> <span class="mi">4</span><span class="o">*</span><span class="n">Le</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="mi">13</span><span class="o">*</span><span class="n">Le</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="o">*</span><span class="n">Le</span><span class="o">**</span><span class="mi">2</span><span class="p">],</span> 
+                                                            <span class="p">[</span><span class="mi">54</span><span class="p">,</span> <span class="mi">13</span><span class="o">*</span><span class="n">Le</span><span class="p">,</span> <span class="mi">156</span><span class="p">,</span> <span class="o">-</span><span class="mi">22</span><span class="o">*</span><span class="n">Le</span><span class="p">],</span> 
+                                                            <span class="p">[</span><span class="o">-</span><span class="mi">13</span><span class="o">*</span><span class="n">Le</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="o">*</span><span class="n">Le</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">22</span><span class="o">*</span><span class="n">Le</span><span class="p">,</span> <span class="mi">4</span><span class="o">*</span><span class="n">Le</span><span class="o">**</span><span class="mi">2</span><span class="p">]])</span>
+    
+    <span class="c1"># Stiffness matrix</span>
+    <span class="n">K</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="o">*</span><span class="n">num_elements</span><span class="o">+</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">num_elements</span><span class="o">+</span><span class="mi">2</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_elements</span><span class="p">):</span>
+        <span class="n">K</span><span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="n">i</span><span class="p">:</span><span class="mi">2</span><span class="o">*</span><span class="n">i</span><span class="o">+</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">i</span><span class="p">:</span><span class="mi">2</span><span class="o">*</span><span class="n">i</span><span class="o">+</span><span class="mi">4</span><span class="p">]</span> <span class="o">+=</span> <span class="n">E</span><span class="o">*</span><span class="n">I</span><span class="o">/</span><span class="n">Le</span><span class="o">**</span><span class="mi">3</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">12</span><span class="p">,</span> <span class="mi">6</span><span class="o">*</span><span class="n">Le</span><span class="p">,</span> <span class="o">-</span><span class="mi">12</span><span class="p">,</span> <span class="mi">6</span><span class="o">*</span><span class="n">Le</span><span class="p">],</span> 
+                                                        <span class="p">[</span><span class="mi">6</span><span class="o">*</span><span class="n">Le</span><span class="p">,</span> <span class="mi">4</span><span class="o">*</span><span class="n">Le</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">6</span><span class="o">*</span><span class="n">Le</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">Le</span><span class="o">**</span><span class="mi">2</span><span class="p">],</span> 
+                                                        <span class="p">[</span><span class="o">-</span><span class="mi">12</span><span class="p">,</span> <span class="o">-</span><span class="mi">6</span><span class="o">*</span><span class="n">Le</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="o">-</span><span class="mi">6</span><span class="o">*</span><span class="n">Le</span><span class="p">],</span> 
+                                                        <span class="p">[</span><span class="mi">6</span><span class="o">*</span><span class="n">Le</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">Le</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">6</span><span class="o">*</span><span class="n">Le</span><span class="p">,</span> <span class="mi">4</span><span class="o">*</span><span class="n">Le</span><span class="o">**</span><span class="mi">2</span><span class="p">]])</span>
+    
+    <span class="c1"># Applying boundary conditions (fixing left tip)</span>
+    <span class="n">K_bc</span> <span class="o">=</span> <span class="n">K</span><span class="p">[</span><span class="mi">2</span><span class="p">:,</span> <span class="mi">2</span><span class="p">:]</span>
+    <span class="n">F_bc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">num_elements</span><span class="p">)</span>
+    <span class="n">F_bc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">force</span> <span class="o">*</span> <span class="mi">1000</span>  <span class="c1"># Converting kN to N</span>
+    
+    <span class="c1"># Solving for displacement</span>
+    <span class="n">displacement</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">K_bc</span><span class="p">,</span> <span class="n">F_bc</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">displacement</span></div>
+
+
+<span class="c1"># Example usage</span>
+<span class="n">length</span> <span class="o">=</span> <span class="mf">0.5</span>
+<span class="n">num_elements</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">force</span> <span class="o">=</span> <span class="mi">1</span>
+
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">mypackage</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../mypackage.html">mypackage package</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2024, Author.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

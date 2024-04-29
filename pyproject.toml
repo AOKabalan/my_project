@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "myalipackage"
+version = "1.0.0"
+description = "A sample Python project"
+authors = [
+    {name = "Ali Kabalan Ammar", email = "akabalan@sissa.it"}
+]
+readme = "README.md"
+license = {text = "Unlicense"}
+requires-python = ">=3.7"
+
+dependencies = ["numpy == 1.24.4"]
+
+[project.optional-dependencies]
+test = ["pytest"]
+docs = ["sphinx"]
+
+[tool.setuptools.packages.find]
+where = ["mypackage"]

@@ -1,0 +1,7 @@
+*.pyc
+my_env
+requirements.txt
+./mypackage/*.pyc
+dist
+*.egg-info
+./mypackage/*.egg-info
